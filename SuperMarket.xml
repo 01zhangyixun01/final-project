@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Data>
+  <SuperMarket>
+    <Item>
+      <defName>product</defName>
+      <price>100</price>
+      <stock>1</stock>
+    </Item>
+    <Item>
+        <defName>customer</defName>
+    </Item>
+  </SuperMarket>
+</Data>

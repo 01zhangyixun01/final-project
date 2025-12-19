@@ -1,19 +1,24 @@
 import sqlite3
 import time
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, status, Depends, Response, Cookie
 from pydantic import BaseModel
 from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
+from jose import JWTError, jwt
 
 app = FastAPI()
-
 # 資料庫連線
 DB_FILE = 'data.db'
 conn = sqlite3.connect(DB_FILE, check_same_thread=False)
 cursor = conn.cursor()
+
+# JWT 設定
+SECRET_KEY = "super-secret-key"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 # --- 1. 初始化資料庫 ---
 cursor.execute('''
@@ -61,6 +66,12 @@ def init_data():
 
 init_data()
 
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire, "type": "access"})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
 # --- 2. 資料結構 (Pydantic Models) ---
 
 class LoginData(BaseModel):
@@ -82,7 +93,7 @@ class PurchaseRequest(BaseModel):
 
 # --- 3. 靜態檔案 ---
 # 提醒：若無 static 資料夾，請手動建立或註解掉此行
-# app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # --- 4. API 路徑 (已去除重複) ---
 

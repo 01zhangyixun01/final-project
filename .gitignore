@@ -1,3 +1,6 @@
 __pycache__
 venv 
 .vscode
+customers.db
+data.db
+products.db

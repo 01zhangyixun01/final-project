@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .main{
+            width: 35%;
+            border: 5px solid rgb(48, 63, 73);
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.4);
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            margin-top: 100px;
+        }
+        .topbar{
+            width: calc(100% - 10px);
+            padding: 10px 10px;
+            color: rgb(213, 235, 243);
+            text-align: center;
+            background-color: rgb(48, 63, 73);
+            font-size: 30px;
+        }
+        .content{
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .box{
+            display: flex;
+            margin: 15px;
+            justify-content: flex-start;
+        }
+        .text{
+            width: 170px;
+            font-size: 26px;
+            margin-right: 15px;
+            text-align: center;
+        }
+        .inputbox{
+            width: 60%;
+        }
+        .code{
+            display: none;
+        }
+        .btnbox{
+            margin: auto;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        button{
+            width: 90px;
+            height: 40px;
+            padding: 10;
+            background-color: rgb(209, 223, 228);
+            border: 7px ridge rgb(106, 136, 155);
+            border-radius: 10px;
+            margin: 0px 10px;
+            font-size: 16px;
+        }
+        button:hover{
+            background-color: rgba(206, 231, 241, 0.151);
+            border: 7px ridge rgb(111, 132, 156);
+            color: rgb(64, 103, 117);
+        }
+        .result{
+            color: rgb(196, 82, 29);
+            font-size: 28px;
+            font-weight: 600;
+            margin: 10px auto;
+            margin-bottom: 30PX;
+        }
+        .hold{
+            border: solid 0.5px #ccc; 
+            opacity: 0.8;
+        }
+
+        .hovered{
+            background-color: #333;
+            border-color: white;
+            border-style: dashed;
+        }
+
+        .over{
+            border: 1px dashed gray;
+        }
+        .verification{
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="leftnavbar">
+            <div class="logo navtext">supermarket</div>
+            <a href="./index.php" class="navtext navlink">首頁</a>
+        </div>
+        <div class="rightnavbar">
+        </div>
+    </div>
+    <div class="main">
+        <div class="topbar">商品展示系統</div>
+        <form class="content" action="./login" method="post" id="log">
+            <div class="box">
+                <div class="text">帳號</div>
+                <input type="text" class="inputbox" name="account">
+            </div>
+            <div class="box">
+                <div class="text">密碼</div>
+                <input type="text" class="inputbox" name="password">
+            </div>
+            <div class="box btnbox">
+                <button type="reset" class="reset">清除</button>
+                <button type="button" class="login">登入</button>                
+            </div>
+            <div class="btnbox result">
+                
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let body = {
+            name: "",
+            password: ""
+        }
+
+        let btn = document.querySelector('.login');
+        let name = document.querySelector('input[name="account"]');
+        let password = document.querySelector('input[name="password"]');
+        let result = document.querySelector('.result');
+        const token = 123;
+
+        let headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": `Bearer ${token}`,
+        }
+
+
+        btn.addEventListener('click',function(e){
+            body.name = name.value;
+            body.password = password.value;
+            fetch( 'http://localhost:8000/login',{
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify(body)
+            } )
+            .then((response) => {
+                console.log(response.json);
+            })
+            .catch((error) => {
+               console.log("0");
+            })
+        })
+    </script>
+</body>
+</html>

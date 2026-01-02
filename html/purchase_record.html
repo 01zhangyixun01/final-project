@@ -1,219 +1,110 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>購買紀錄 - 商品展示系統</title>
-    <!-- <link rel="stylesheet" href="/static/style.css"> -->
+    <title>紀錄</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/home.css">
     <style>
-        body {
-            background: #f4f7f6;
-            margin: 0;
-            font-family: 'Segoe UI', Microsoft JhengHei, sans-serif;
-        }
-
-        /* 導覽列 */
-        .navbar {
-            background-color: #2c3e50;
-            padding: 0 20px;
-            height: 60px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .logo { font-weight: bold; color: #fff; text-decoration: none; font-size: 20px; }
-        .navlink { color: #bdc3c7; text-decoration: none; font-size: 15px; margin-left: 15px; transition: 0.3s; }
-        .navlink:hover { color: white; }
-        
-        button.out {
-            background: transparent;
-            border: 1px solid #e74c3c;
-            color: #e74c3c;
-            padding: 5px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button.out:hover { background: #e74c3c; color: white; }
-
-        /* 主容器 */
-        .container {
-            max-width: 1100px;
-            margin: 40px auto;
-            padding: 0 15px;
-        }
-
-        h2 { color: #2c3e50; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
-
-        /* RWD 表格容器 */
-        .table-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto; /* 關鍵：手機版可滑動 */
-        }
-
-        .main-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 700px; /* 確保內容不擠壓 */
-        }
-
-        .main-table th {
-            background-color: #f8f9fa;
-            color: #34495e;
-            font-weight: 600;
-            padding: 18px 15px;
-            text-align: left;
-            border-bottom: 2px solid #edf2f7;
-        }
-
-        .main-table td {
-            padding: 15px;
-            border-bottom: 1px solid #edf2f7;
-            color: #4a5568;
-            font-size: 14px;
-        }
-
-        /* 斑馬紋與懸停效果 */
-        .main-table tr:nth-child(even) { background-color: #fafafa; }
-        .main-table tr:hover { background-color: #f1f7ff; }
-
-        /* 金額強調 */
-        .price-text { color: #e53e3e; font-weight: 600; }
-        .count-badge {
-            background: #edf2f7;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 12px;
-        }
-
-        /* 空狀態提示 */
-        .empty-state {
-            padding: 50px;
-            text-align: center;
-            color: #a0aec0;
-        }
-
-        /* RWD 手機調整 */
-        @media (max-width: 600px) {
-            .container { margin: 20px auto; }
-            h2 { font-size: 20px; }
-            .navbar { padding: 0 10px; }
-            .logo { font-size: 16px; }
-        }
+        .navbar { margin-bottom: 50px; }
+        .main { display: table; width: 100%; border-collapse: collapse; }
+        .main td { padding: 8px; text-align: center; }
     </style>
 </head>
 <body>
     <div class="navbar">
         <div class="leftnavbar">
-            <a href="#" id="homeLink" class="logo">SUPERMARKET</a>
-            <a href="#" id="homeSubLink" class="navlink">首頁</a>
+            <div class="logo navtext">supermarket</div>
+            <a href="./home" class="navtext navlink" id="homeLink">首頁</a>
         </div>
         <div class="rightnavbar">
-            <button class="out" id="logoutBtn">登出系統</button>
+            <button class="out navlink navtext" id="logoutBtn">登出</button>
         </div>
     </div>
 
-    <div class="container">
-        <h2>📊 購買紀錄查詢</h2>
-
-        <div class="table-card">
-            <div class="table-responsive">
-                <table class="main-table" id="recordTable">
-                    <thead>
-                        <tr id="tableHeader">
-                            </tr>
-                    </thead>
-                    <tbody id="recordBody">
-                        <tr>
-                            <td colspan="6" class="empty-state">資料載入中...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    <table rules="all" class="main" id="recordTable">
+        <tr class="tr1">
+            <td colspan="6">載入中...</td>
+        </tr>
+    </table>
 
     <script>
-        const recordBody = document.querySelector('#recordBody');
-        const tableHeader = document.querySelector('#tableHeader');
+        const main = document.querySelector('#recordTable');
         const token = sessionStorage.getItem('token');
         const homeLink = document.querySelector('#homeLink');
-        const homeSubLink = document.querySelector('#homeSubLink');
 
+        // 檢查 Token 是否存在
         if (!token) {
             window.location.replace('/');
         } else {
+            // 修正 1 & 2: 統一使用 token 變數並解碼判斷首頁路徑
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
-                const dest = (payload.level === 0) ? "./manager" : "./home";
-                homeLink.href = dest;
-                homeSubLink.href = dest;
+                if (payload.level === 0) {
+                    homeLink.href = "./manager"; 
+                } else {
+                    homeLink.href = "./home";
+                }
             } catch (e) {
                 console.error("Token 解析失敗");
             }
         }
 
-        const formatTime = (ts) => new Date(ts * 1000).toLocaleString('zh-TW', { hour12: false });
+        // 解析時間戳記的函式
+        const formatTime = (ts) => new Date(ts * 1000).toLocaleString();
 
+        // 抓取紀錄
         fetch('http://127.0.0.1:8000/getPurchaseHistory', {
             method: "GET",
             headers: { "Authorization": `Bearer ${token}` }
         })
         .then(res => res.json())
         .then(response => {
-            const level = response.level; // 0 是管理員
+            const level = response.level;
             const allData = response.data;
 
             // 1. 生成表頭
-            tableHeader.innerHTML = `
-                ${level === 0 ? '<th>購買帳號</th>' : ''}
-                <th>商品名稱</th>
-                <th>單價</th>
-                <th>數量</th>
-                <th>總計金額</th>
-                <th>交易時間</th>
-            `;
+            let tableContent = `
+                <tr class="tr1">
+                    ${level === 0 ? '<td>帳號</td>' : ''}
+                    <td>商品</td>
+                    <td>單價</td>
+                    <td>數量</td>
+                    <td>總金額</td>
+                    <td>時間</td>
+                </tr>`;
 
-            // 2. 渲染資料
-            if (!allData || allData.length === 0) {
-                recordBody.innerHTML = `<tr><td colspan="6" class="empty-state">目前尚無任何交易紀錄</td></tr>`;
+            // 2. 渲染資料內容
+            if (allData.length === 0) {
+                tableContent += `<tr><td colspan="6">目前沒有紀錄</td></tr>`;
             } else {
-                let html = '';
                 allData.forEach(ele => {
                     const totalPrice = ele.price * ele.count;
-                    html += `
+                    const timeStr = formatTime(ele.time);
+                    tableContent += `
                         <tr>
-                            ${level === 0 ? `<td style="font-weight:500">${ele.user_name}</td>` : ''}
+                            ${level === 0 ? `<td>${ele.user_name}</td>` : ''}
                             <td>${ele.product}</td>
                             <td>$${ele.price}</td>
-                            <td><span class="count-badge">${ele.count}</span></td>
-                            <td><span class="price-text">$${totalPrice}</span></td>
-                            <td style="color:#718096">${formatTime(ele.time)}</td>
+                            <td>${ele.count}</td>
+                            <td>$${totalPrice}</td>
+                            <td>${timeStr}</td>
                         </tr>`;
                 });
-                recordBody.innerHTML = html;
             }
+            main.innerHTML = tableContent;
         })
         .catch(err => {
-            recordBody.innerHTML = `<tr><td colspan="6" class="empty-state" style="color:#e53e3e">連線失敗，請重新登入</td></tr>`;
+            console.error("Error:", err);
+            main.innerHTML = `<tr><td colspan="6">無法取得紀錄，請重新登入</td></tr>`;
         });
 
+        // 登出功能
         document.querySelector('#logoutBtn').addEventListener('click', () => {
-            if(confirm("確定要登出嗎？")) {
-                sessionStorage.removeItem('token');
-                window.location.replace('/');
-            }
+            sessionStorage.removeItem('token');
+            window.location.replace('/');
         });
     </script>
 </body>

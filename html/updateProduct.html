@@ -4,16 +4,105 @@
     <meta charset="UTF-8">
     <title>編輯商品</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/home.css">
+    <style>
+        .main{
+            width: 35%;
+            border: 5px solid rgb(48, 63, 73);
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.4);
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            margin-top: 100px;
+        }
+        .topbar{
+            width: calc(100% - 20px);
+            padding: 10px 10px;
+            color: rgb(213, 235, 243);
+            text-align: center;
+            background-color: rgb(48, 63, 73);
+            font-size: 30px;
+        }
+        .content{
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .box{
+            display: flex;
+            margin: 15px;
+            justify-content: flex-start;
+        }
+        .text{
+            width: 170px;
+            font-size: 26px;
+            margin-right: 15px;
+            text-align: center;
+        }
+        .inputbox{
+            width: 60%;
+        }
+        .code{
+            display: none;
+        }
+        .btnbox{
+            margin: auto;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .result{
+            font-size: 28px;
+            font-weight: 600;
+            margin: 10px auto;
+            margin-bottom: 30PX;
+        }
+        .hold{
+            border: solid 0.5px #ccc; 
+            opacity: 0.8;
+        }
+
+        .hovered{
+            background-color: #333;
+            border-color: white;
+            border-style: dashed;
+        }
+
+        .over{
+            border: 1px dashed gray;
+        }
+        .verification{
+            display: none;
+        }
+
+    </style>
 </head>
+
 <body>
+    <div class="navbar">
+        <div class="leftnavbar">
+            <div class="logo navtext">supermarket</div>
+            <a href="./home" class="navtext navlink" id="homeLink">首頁</a>
+        </div>
+        <div class="rightnavbar">
+            <!-- <button class="out navlink navtext" id="logoutBtn">登出</button> -->
+        </div>
+    </div>     
     <div class="main">
-        <h2>編輯商品</h2>
-        <input type="text" id="name" placeholder="商品名稱"><br>
-        <textarea id="description" placeholder="商品描述"></textarea><br>
-        <input type="number" id="price" placeholder="價格"><br>
-        <input type="text" id="image_url" placeholder="圖片網址"><br>
-        <button id="saveBtn">儲存修改</button>
-        <button onclick="history.back()">取消</button>
+        <div class="topbar">編輯商品</div>
+        <div class="content">
+            <input type="text" id="name" placeholder="商品名稱"><br>
+            <textarea id="description" placeholder="商品描述"></textarea><br>
+            <input type="number" id="price" placeholder="價格"><br>
+            <input type="text" id="image_url" placeholder="圖片網址"><br>
+            <div class="box btnbox">
+                <button id="saveBtn">儲存修改</button>
+                <button onclick="history.back()">取消</button>
+            </div>
+
+        </div>
+
     </div>
 
     <script>
@@ -62,6 +151,8 @@
                 alert("修改失敗：" + result.message);
             }
         };
+
+
     </script>
 </body>
 </html>

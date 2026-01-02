@@ -9,11 +9,7 @@
     <link rel="stylesheet" href="/static/home.css">
 
     <style>
-        .product_box:hover{
-            width: 31%;
-            height: 310px;
 
-        }
     </style>
 </head>
 <body>
@@ -24,7 +20,7 @@
         </div>
         <div class="rightnavbar">
             <a class="navtext navlink" href="./purchase_record.html">購買紀錄</a>
-            <button class="out navlink navtext">登出</button>
+            <a class="out navlink navtext">登出</a>
         </div>
     </div>
     
@@ -37,7 +33,6 @@
         // <a class="navtext navlink" href="./record.php">購買紀錄</a>
         // <a class="out navlink navtext href="./user.php">登出</a>
         // ` 
-        const out = document.querySelector('.out');
         let token = sessionStorage.getItem('token');
         console.log(token);
 
@@ -75,28 +70,47 @@
             console.log(`Error: ${error}`);
         })
 
-        out.addEventListener('click',function(){
-            
-            sessionStorage.removeItem("token");
-            window.location.replace('/');
-        })
 
     main.addEventListener('click', function(e) {
-    // 檢查點擊的目標是否為 product_box 或是其子元素
-    const box = e.target.closest('.product_box');
-    
-    if (box) {
-        const productId = box.querySelector('.proID').innerText; 
-        const name = box.querySelector('.name_box').innerText;
+        // 檢查點擊的目標是否為 product_box 或是其子元素
+        const box = e.target.closest('.product_box');
+        
+        if (box) {
+            const productId = box.querySelector('.proID').innerText; 
+            const name = box.querySelector('.name_box').innerText;
 
-        // 2. 詢問使用者
-        const goBuy = confirm(`你選擇了「${name}」，要前往購買頁面嗎？`);
+            // 2. 詢問使用者
+            const goBuy = confirm(`你選擇了「${name}」，要前往購買頁面嗎？`);
 
-        if (goBuy) {
-            window.location.href = `./buy.html?id=${productId}`;
+            if (goBuy) {
+                window.location.href = `./buy.html?id=${productId}`;
+            }
         }
+    });
+
+    const logoutBtn = document.querySelector('.out');
+
+    // 2. 綁定點擊事件
+    logoutBtn.addEventListener('click', function(e) {
+        e.preventDefault(); // 防止 <a> 標籤跳轉
+
+        // 彈出確認視窗（選擇性）
+        if (!confirm("確定要登出嗎？")) return;
+
+        // 3. 清除前端儲存的資料
+        sessionStorage.removeItem('token');
+        // 如果你有存其他資料也要一起清掉
+        // sessionStorage.clear(); 
+
+        alert("您已成功登出");
+
+        // 4. 跳轉回登入頁面
+        window.location.replace('/'); 
+    });
+    function goToUpdate(productId) {
+        // 跳轉到 updateProduct.html 並帶上 ID
+        window.location.href = `./updateProduct.html?id=${productId}`;
     }
-});
     </script>
 </body>
 </html>

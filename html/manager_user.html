@@ -6,9 +6,24 @@
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/home.css">
     <style>
-        .main { display: table; width: 80%; margin: 20px auto; border-collapse: collapse; }
-        td, th { padding: 10px; border: 1px solid #ccc; text-align: center; }
-        .del_btn { background: #ff4d4d; color: white; border: none; padding: 5px 10px; cursor: pointer; }
+        .main{
+            display: table;
+            width: 80%; 
+            margin: 20px auto; 
+            border-collapse: collapse;
+        }
+        td, tr{
+            padding: 10px; 
+            border: 1px solid rgb(48, 63, 73); 
+            text-align: center;
+        }
+        .del_btn{ 
+            background: #ff4d4d; 
+            color: white; 
+            border: none; 
+            padding: 5px 10px; 
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -16,17 +31,17 @@
     <div class="navbar">
         <div class="leftnavbar">
             <div class="logo navtext">supermarket</div>
-            <a href="./manager" class="navtext navlink">回管理首頁</a>
+            <a href="./manager" class="navtext navlink">首頁</a>
         </div>
     </div>
 
     <table class="main" id="userTable">
         <thead>
-            <tr>
-                <th>ID</th>
-                <th>使用者名稱</th>
-                <th>等級 (0:管理員 1:會員)</th>
-                <th>操作</th>
+            <tr class="tr1">
+                <td>ID</td>
+                <td>使用者名稱</td>
+                <td>等級</td>
+                <td>操作</td>
             </tr>
         </thead>
         <tbody id="userList">
@@ -36,6 +51,7 @@
     <script>
         const token = sessionStorage.getItem('token_access') || sessionStorage.getItem('token'); 
         const userList = document.querySelector('#userList');
+        let level = "";
 
         console.log("目前的 Token:", token); 
 
@@ -53,11 +69,16 @@
         .then(response => {
             if (response.sta === 1) {
                 response.data.forEach(user => {
+                    if(user.level == 0){
+                        level = "管理員";
+                    }else{
+                        level = "會員";
+                    }
                     userList.innerHTML += `
                         <tr>
                             <td>${user.id}</td>
                             <td>${user.name}</td>
-                            <td>${user.level}</td>
+                            <td>${level}</td>
                             <td>
                                 <button class="del_btn" onclick="deleteUser(${user.id})">刪除</button>
                             </td>

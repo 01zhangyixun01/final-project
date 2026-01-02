@@ -1,88 +1,254 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="/static/home.css">
+    <title>確認購買 - 超級市場</title>
+    <style>
+        /* 基礎樣式重設 */
+        * { box-sizing: border-box; }
+        body {
+            background: #f4f7f6;
+            margin: 0;
+            font-family: 'Segoe UI', "Microsoft JhengHei", sans-serif;
+            color: #333;
+        }
+
+        /* 導覽列 */
+        .navbar {
+            background-color: #2c3e50;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .logo { font-weight: bold; color: #fff; text-decoration: none; font-size: 1.2rem; }
+        .navlink { color: #bdc3c7; text-decoration: none; font-size: 0.9rem; }
+
+        /* 購買容器 */
+        .buy-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            display: flex;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            gap: 30px;
+        }
+
+        /* 左側圖片 */
+        .product-image-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .img_box {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        /* 右側資訊 */
+        .product-info-section {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .name_box { font-size: 1.8rem; font-weight: bold; margin-bottom: 10px; color: #2c3e50; }
+        .text { color: #7f8c8d; line-height: 1.6; margin-bottom: 20px; }
+        .cost_box { font-size: 1.5rem; color: #e74c3c; font-weight: bold; margin-bottom: 25px; }
+
+        /* 購買控制區 */
+        .order-controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        label { font-weight: bold; color: #34495e; }
+
+        /* 數量輸入框美化 */
+        input[type="number"] {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .total-price-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+        .btn:hover { background: #27ae60; transform: translateY(-2px); }
+        .btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+
+        /* RWD 響應式設計 */
+        @media (max-width: 768px) {
+            .buy-container {
+                flex-direction: column;
+                margin: 20px;
+                padding: 15px;
+            }
+            .product-image-section { margin-bottom: 20px; }
+            .name_box { font-size: 1.4rem; }
+        }
+    </style>
 </head>
 <body>
-    <div class="main"></div>
-    
+
+    <div class="navbar">
+        <a href="./home" class="logo">SUPERMARKET</a>
+        <a href="./home" class="navlink">取消購買並返回</a>
+    </div>
+
+    <div class="main">
+        <p style="text-align: center; margin-top: 50px;" id="loadingText">商品資訊載入中...</p>
+    </div>
+
     <script>
-    const main = document.querySelector('.main');
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('id');
+        const main = document.querySelector('.main');
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+        let token = sessionStorage.getItem('token');
+        let productPrice = 0; // 用於計算總價
 
-    let token = sessionStorage.getItem('token');
+        if (!token || !productId) {
+            window.location.replace('/');
+        }
 
-    const headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Authorization": `Bearer ${token}`,
-    }
+        const headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": `Bearer ${token}`,
+        }
 
-    fetch('http://127.0.0.1:8000/getProducts', {
-        method: "GET",
-        headers: headers
-    })
-    .then(response => response.json())
-    .then(response => {
-        response.data.forEach(thing => {
-            if (thing.id == productId) {
-                main.innerHTML += `
-                    <div class="product_box">
-                        <div class="thing name_box">${thing.name}</div>
-                        <img class="thing img_box" src="${thing.image_url}" alt="商品圖片">
-                        <div class="thing cost_box">$${thing.price}</div>
-                        <div class="thing text">${thing.description}</div>
-                    </div>
-                    <input type="number" id="buyCount" value="1" min="1">
-                    <button class="btn">確認購買</button>`;
+        // 取得商品詳情
+        fetch('http://127.0.0.1:8000/getProducts', {
+            method: "GET",
+            headers: headers
+        })
+        .then(response => response.json())
+        .then(response => {
+            const product = response.data.find(thing => thing.id == productId);
+            
+            if (product) {
+                productPrice = product.price;
+                document.getElementById('loadingText').style.display = 'none';
+                
+                main.innerHTML = `
+                    <div class="buy-container">
+                        <div class="product-image-section">
+                            <img class="img_box" src="${product.image_url}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/400x300?text=無商品圖片'">
+                        </div>
+                        <div class="product-info-section">
+                            <div class="name_box">${product.name}</div>
+                            <div class="text">${product.description || '暫無商品描述。'}</div>
+                            <div class="cost_box">單價：$${product.price}</div>
+                            
+                            <div class="order-controls">
+                                <div class="control-group">
+                                    <label for="buyCount">購買數量</label>
+                                    <input type="number" id="buyCount" value="1" min="1" oninput="updateTotal()">
+                                </div>
+                                <div class="total-price-display">
+                                    <span>應付總額</span>
+                                    <span id="totalAmount">$${product.price}</span>
+                                </div>
+                                <button class="btn" id="submitBtn">確認購買</button>
+                            </div>
+                        </div>
+                    </div>`;
+
+                bindEvents();
+            } else {
+                main.innerHTML = '<p style="text-align:center;">找不到該商品</p>';
             }
+        })
+        .catch(error => {
+            console.error(error);
+            main.innerHTML = '<p style="text-align:center;">連線錯誤</p>';
         });
 
-        // --- 關鍵：按鈕生成後才綁定監聽器 ---
-        const btn = document.querySelector(".btn");
-        if (btn) {
+        // 動態更新總價
+        function updateTotal() {
+            const count = document.querySelector("#buyCount").value;
+            const totalAmount = document.querySelector("#totalAmount");
+            if (count > 0) {
+                totalAmount.innerText = `$${count * productPrice}`;
+            }
+        }
+
+        function bindEvents() {
+            const btn = document.querySelector("#submitBtn");
             btn.addEventListener('click', async () => {
-                const countInput = document.querySelector("#buyCount");
-                const count = parseInt(countInput.value);
+                const count = parseInt(document.querySelector("#buyCount").value);
 
                 if (isNaN(count) || count <= 0) {
-                    alert("請輸入正確的數量");
+                    alert("請輸入有效的數量");
                     return;
                 }
 
-                // 準備傳送給後端的資料
-                const body = {
-                    product_id: parseInt(productId),
-                    count: count
-                };
+                btn.disabled = true;
+                btn.innerText = "處理中...";
 
                 try {
                     const res = await fetch('http://127.0.0.1:8000/buyProduct', {
                         method: "POST",
                         headers: headers,
-                        body: JSON.stringify(body)
+                        body: JSON.stringify({
+                            product_id: parseInt(productId),
+                            count: count
+                        })
                     });
                     const result = await res.json();
 
                     if (result.sta === 1) {
-                        alert(result.message);
-                        window.location.href = './home'; // 購買成功回首頁
+                        alert("🎉 購買成功！感謝您的訂購。");
+                        window.location.href = './purchase_record.html'; // 建議導向購買紀錄確認
                     } else {
                         alert("購買失敗：" + result.message);
+                        btn.disabled = false;
+                        btn.innerText = "確認購買";
                     }
                 } catch (error) {
-                    console.error("Error:", error);
-                    alert("網路連線錯誤");
+                    alert("網路連線失敗，請稍後再試");
+                    btn.disabled = false;
+                    btn.innerText = "確認購買";
                 }
             });
         }
-    })
-    .catch(error => console.log(`Error: ${error}`));
-</script>
+    </script>
 </body>
 </html>

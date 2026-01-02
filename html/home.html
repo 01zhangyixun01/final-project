@@ -1,102 +1,169 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>首頁</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="/static/home.css">
-
+    <title>商品首頁</title>
     <style>
-        .product_box:hover{
-            width: 31%;
-            height: 310px;
+        /* 全域重設，防止報版 */
+        * { box-sizing: border-box; }
+        body {
+            background: #f4f7f6;
+            margin: 0;
+            font-family: "Microsoft JhengHei", sans-serif;
+        }
 
+        /* 導覽列 */
+        .navbar {
+            background-color: #2c3e50;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .leftnavbar, .rightnavbar { display: flex; align-items: center; gap: 15px; }
+        .logo { font-size: 1.5rem; font-weight: bold; color: #fff; }
+        .navlink { color: #ecf0f1; text-decoration: none; transition: 0.3s; }
+        .navlink:hover { color: #3498db; }
+        .out { 
+            background: #e74c3c; color: white; border: none; 
+            padding: 5px 12px; border-radius: 4px; cursor: pointer; 
+        }
+
+        /* 商品網格：解決報版關鍵 */
+        .main {
+            display: grid;
+            /* 讓瀏覽器根據寬度自動決定塞幾個卡片，最少 250px */
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* 商品卡片美化 */
+        .product_box {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+        .product_box:hover {
+            transform: translateY(-5px);
+        }
+
+        .img_box {
+            width: 100%;
+            height: 200px;
+            object-fit: cover; /* 確保圖片不變形 */
+            background: #eee;
+        }
+
+        .name_box {
+            padding: 15px 15px 5px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .cost_box {
+            padding: 0 15px;
+            font-size: 1.3rem;
+            color: #e67e22;
+            font-weight: bold;
+        }
+
+        .text {
+            padding: 10px 15px 20px;
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            flex-grow: 1;
+        }
+
+        /* RWD 手機版調整 */
+        @media (max-width: 600px) {
+            .navbar { flex-direction: column; gap: 10px; }
+            .main { grid-template-columns: 1fr; } /* 手機版一列一個 */
         }
     </style>
 </head>
 <body>
     <div class="navbar">
         <div class="leftnavbar">
-            <div class="logo navtext">supermarket</div>
-            <a href="./home" class="navtext navlink">首頁</a>
+            <div class="logo">SUPERMARKET</div>
+            <a href="./home" class="navlink">首頁</a>
         </div>
         <div class="rightnavbar">
-            <a class="navtext navlink" href="./purchase_record.html">購買紀錄</a>
-            <button class="out navlink navtext">登出</button>
+            <a class="navlink" href="./purchase_record.html">購買紀錄</a>
+            <button class="out">登出</button>
         </div>
     </div>
     
-    <div class="main">
+    <div class="main" id="productContainer">
+        <p style="text-align: center; grid-column: 1/-1;">正在載入商品...</p>
     </div>
 
     <script>
-        // const navrightbar = document.querySelector('.rightnavbar');
-        // navrightbar.innerHTML = `
-        // <a class="navtext navlink" href="./record.php">購買紀錄</a>
-        // <a class="out navlink navtext href="./user.php">登出</a>
-        // ` 
-        const out = document.querySelector('.out');
-        let token = sessionStorage.getItem('token');
-        console.log(token);
+        const container = document.querySelector('#productContainer');
+        const token = sessionStorage.getItem('token');
 
-        const headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "Authorization": `Bearer ${token}`,
+        // 登入檢查
+        if (!token) { window.location.replace('/'); }
+
+        // 抓取 API
+        fetch('http://127.0.0.1:8000/getProducts', {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Accept": "application/json"
+            }
+        })
+        .then(res => res.json())
+        .then(response => {
+            console.log("API 資料內容:", response); // 檢查控制台看看資料有沒有進來
+            
+            if (response.data && response.data.length > 0) {
+                container.innerHTML = ''; // 清除「載入中」文字
+                response.data.forEach(thing => {
+                    // 這裡使用 template literal 生成 HTML
+                    container.innerHTML += `
+                        <div class="product_box" onclick="handleBuy(${thing.id}, '${thing.name}')">
+                            <img class="img_box" src="${thing.image_url}" alt="${thing.name}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                            <div class="name_box">${thing.name}</div>
+                            <div class="cost_box">$${thing.price}</div>
+                            <div class="text">${thing.description || '暫無描述'}</div>
+                        </div>`;
+                });
+            } else {
+                container.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">目前沒有商品上架中</p>';
+            }
+        })
+        .catch(err => {
+            console.error("Fetch Error:", err);
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: red;">無法連接伺服器</p>';
+        });
+
+        // 購買跳轉
+        function handleBuy(id, name) {
+            if (confirm(`確定要購買「${name}」嗎？`)) {
+                window.location.href = `./buy.html?id=${id}`;
+            }
         }
 
-        const main = document.querySelector('.main');
-        fetch( 'http://127.0.0.1:8000/getProducts',{
-            method: "GET",
-            headers: headers
-            //body: JSON.stringify(body)
-        } )
-        .then((response) => {
-            return response.json();
-        })
-        .then( (response) => {
-            console.log(response);
-
-            response.data.forEach(thing => {
-                main.innerHTML += `
-                <div class="product_box" >
-                    <div class="proID" style="display: none;">${thing.id}</div>
-                    <div class="thing name_box">${thing.name}</div>
-                    <img class="thing img_box" src="${thing.image_url}" alt="">
-                    <div class="thing cost_box">$${thing.price}</div>
-                    <div class="thing text">${thing.description}</div>
-                    
-                </div>`                
-            });
-        })
-        .catch((error) => {
-            console.log(`Error: ${error}`);
-        })
-
-        out.addEventListener('click',function(){
-            
+        // 登出
+        document.querySelector('.out').addEventListener('click', () => {
             sessionStorage.removeItem("token");
             window.location.replace('/');
-        })
-
-    main.addEventListener('click', function(e) {
-    // 檢查點擊的目標是否為 product_box 或是其子元素
-    const box = e.target.closest('.product_box');
-    
-    if (box) {
-        const productId = box.querySelector('.proID').innerText; 
-        const name = box.querySelector('.name_box').innerText;
-
-        // 2. 詢問使用者
-        const goBuy = confirm(`你選擇了「${name}」，要前往購買頁面嗎？`);
-
-        if (goBuy) {
-            window.location.href = `./buy.html?id=${productId}`;
-        }
-    }
-});
+        });
     </script>
 </body>
 </html>

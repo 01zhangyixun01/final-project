@@ -1,27 +1,181 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>編輯商品</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>編輯商品 - 管理系統</title>
+    <style>
+        /* 基礎設定 */
+        * { box-sizing: border-box; }
+        body {
+            background: #f4f7f6;
+            margin: 0;
+            font-family: 'Segoe UI', Microsoft JhengHei, sans-serif;
+        }
+
+        /* 導覽列 */
+        .navbar {
+            background-color: #2c3e50;
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .logo { font-weight: bold; color: #fff; text-decoration: none; font-size: 20px; }
+        .navlink { color: #bdc3c7; text-decoration: none; font-size: 15px; }
+
+        /* 表單卡片 */
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        h2 { color: #2c3e50; margin-top: 0; text-align: center; border-bottom: 2px solid #f0f2f5; padding-bottom: 15px; }
+
+        .form-group { margin-bottom: 20px; }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        input[type="text"], 
+        input[type="number"], 
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        textarea { height: 120px; resize: vertical; }
+
+        /* 圖片預覽區 */
+        .preview-section {
+            text-align: center;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        #previewImg {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 6px;
+            display: none; /* 有網址才顯示 */
+        }
+
+        /* 按鈕組 */
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-save { background: #3498db; color: white; }
+        .btn-save:hover { background: #2980b9; }
+
+        .btn-cancel { background: #ecf0f1; color: #7f8c8d; }
+        .btn-cancel:hover { background: #bdc3c7; }
+
+        /* RWD 調整 */
+        @media (max-width: 600px) {
+            .container { margin: 20px; padding: 20px; }
+            .btn-group { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
-    <div class="main">
-        <h2>編輯商品</h2>
-        <input type="text" id="name" placeholder="商品名稱"><br>
-        <textarea id="description" placeholder="商品描述"></textarea><br>
-        <input type="number" id="price" placeholder="價格"><br>
-        <input type="text" id="image_url" placeholder="圖片網址"><br>
-        <button id="saveBtn">儲存修改</button>
-        <button onclick="history.back()">取消</button>
+
+    <div class="navbar">
+        <a href="/manager" class="logo">SUPERMARKET</a>
+        <a href="/manager" class="navlink">返回後台</a>
+    </div>
+
+    <div class="container">
+        <h2>編輯商品資訊</h2>
+        
+        <div class="preview-section">
+            <p style="margin-top:0; color:#7f8c8d; font-size:14px;">目前商品圖片預覽</p>
+            <img id="previewImg" src="" alt="圖片預覽">
+        </div>
+
+        <div class="form-group">
+            <label>商品名稱</label>
+            <input type="text" id="name" placeholder="請輸入商品名稱">
+        </div>
+
+        <div class="form-group">
+            <label>價格 (TWD)</label>
+            <input type="number" id="price" placeholder="請輸入價格">
+        </div>
+
+        <div class="form-group">
+            <label>圖片網址 (URL)</label>
+            <input type="text" id="image_url" placeholder="請貼上圖片連結" oninput="updatePreview()">
+        </div>
+
+        <div class="form-group">
+            <label>商品描述</label>
+            <textarea id="description" placeholder="請輸入詳細描述..."></textarea>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-save" id="saveBtn">儲存所有修改</button>
+            <button class="btn btn-cancel" onclick="history.back()">取消返回</button>
+        </div>
     </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const productId = urlParams.get('id');
         const token = sessionStorage.getItem('token');
+        const previewImg = document.getElementById('previewImg');
+
+        // 圖片即時預覽函式
+        function updatePreview() {
+            const url = document.getElementById('image_url').value;
+            if (url) {
+                previewImg.src = url;
+                previewImg.style.display = 'inline-block';
+            } else {
+                previewImg.style.display = 'none';
+            }
+        }
 
         // 1. 載入原始資料
+        if (!productId) {
+            alert("無效的商品 ID");
+            window.location.href = "./manager";
+        }
+
         fetch('http://127.0.0.1:8000/getProducts', {
             headers: { "Authorization": `Bearer ${token}` }
         })
@@ -33,33 +187,54 @@
                 document.getElementById('description').value = product.description;
                 document.getElementById('price').value = product.price;
                 document.getElementById('image_url').value = product.image_url;
+                updatePreview();
             }
-        });
+        })
+        .catch(err => console.error("載入失敗:", err));
 
         // 2. 儲存修改
         document.getElementById('saveBtn').onclick = async () => {
+            const saveBtn = document.getElementById('saveBtn');
+            const name = document.getElementById('name').value;
+            const price = document.getElementById('price').value;
+
+            if (!name || !price) {
+                alert("名稱與價格為必填欄位！");
+                return;
+            }
+
             const updatedData = {
-                name: document.getElementById('name').value,
+                name: name,
                 description: document.getElementById('description').value,
-                price: parseInt(document.getElementById('price').value),
+                price: parseInt(price),
                 image_url: document.getElementById('image_url').value
             };
 
-            const res = await fetch(`http://127.0.0.1:8000/updateProduct/${productId}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify(updatedData)
-            });
+            saveBtn.innerText = "儲存中...";
+            saveBtn.disabled = true;
 
-            const result = await res.json();
-            if (result.sta === 1) {
-                alert("修改成功！");
-                window.location.href = "./manager";
-            } else {
-                alert("修改失敗：" + result.message);
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/updateProduct/${productId}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                const result = await res.json();
+                if (result.sta === 1) {
+                    alert("修改成功！");
+                    window.location.href = "./manager";
+                } else {
+                    alert("修改失敗：" + result.message);
+                    saveBtn.innerText = "儲存修改";
+                    saveBtn.disabled = false;
+                }
+            } catch (error) {
+                alert("連線伺服器出錯");
+                saveBtn.disabled = false;
             }
         };
     </script>
